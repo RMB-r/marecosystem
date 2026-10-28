@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistema Marino 3D - Gran Acuario Oceánico WebGL2</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #010814;
+            color: #e0f2fe;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+        /* El canvas ocupa TODA la pantalla completa */
+        #glCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            z-index: 1;
+            cursor: grab;
+        }
+        #glCanvas:active {
+            cursor: grabbing;
+        }
+        /* Título flotante superior */
+        #header-banner {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            text-align: center;
+            pointer-events: none;
+        }
+        #header-banner h1 {
+            margin: 0;
+            font-size: 1.45rem;
+            letter-spacing: 3px;
+            color: #38bdf8;
+            text-shadow: 0 0 16px rgba(56, 189, 248, 0.7);
+            font-weight: 700;
+        }
+        #header-banner p {
+            margin: 3px 0 0 0;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            color: #94a3b8;
+        }
+
+        /* Panel de Información y Controles (Arriba a la Izquierda) */
+        #ui-overlay {
+            position: fixed;
+            top: 14px;
+            left: 14px;
+            z-index: 10;
+            background: rgba(10, 18, 35, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.80rem;
+            line-height: 1.55;
+            color: #cbd5e1;
+            pointer-events: auto;
+            max-width: 320px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+        }
+        #ui-overlay strong {
+            color: #38bdf8;
+        }
+        .stat-tag {
+            color: #38bdf8;
+            font-weight: bold;
+        }
+        .section-title {
+            color: #38bdf8;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .creature-badge {
+            background: rgba(56, 189, 248, 0.12);
+            padding: 2px 7px;
+            border-radius: 4px;
+            margin: 2px 0;
+            display: inline-block;
+            font-size: 0.76rem;
+            border: 1px solid rgba(56, 189, 248, 0.22);
+        }
+
+        /* Selector de Iluminación Día / Tarde / Noche */
+        .cycle-bar {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .btn-cycle {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #cbd5e1;
+            padding: 5px 6px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .btn-cycle:hover {
+            background: rgba(56, 189, 248, 0.25);
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+        .btn-cycle.active-cycle {
+            background: #0284c7;
+            border-color: #38bdf8;
+            color: #ffffff;
+            font-weight: bold;
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.65);
+        }
+
+        /* Barra de Acciones Flotante Inferior */
+        #bottom-bar {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(10, 18, 35, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 10px;
+            padding: 8px 18px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+        }
+        .btn-action {
+            background: #0369a1;
+            border: 1px solid #38bdf8;
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            pointer-events: auto;
+        }
+        .btn-action:hover {
+            background: #0284c7;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+            transform: translateY(-1px);
+        }
+        .btn-action:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Canvas WebGL2 en Pantalla Completa (Full Screen) -->
+    <canvas id="glCanvas"></canvas>
+
+    <!-- Título flotante -->
+    <div id="header-banner">
+        <h1>ECOSISTEMA MARINO 3D</h1>
+        <p>Mini Motor Gráfico WebGL 2.0 • Renderizado Oceánico Realista</p>
+    </div>
+
+    <!-- Panel de controles y biodiversidad flotante -->
+    <div id="ui-overlay">
+        <div class="section-title">⏱️ Iluminación Atmosférica:</div>
+        <div id="lblCiclo" style="font-weight: bold; color: #f0fdf4; margin-bottom: 4px;">☀️ Día (Sol Cenital)</div>
+        <div class="cycle-bar">
+            <button class="btn-cycle active-cycle" id="btnDia">☀️ Día (D)</button>
+            <button class="btn-cycle" id="btnTarde">🌅 Tarde (T)</button>
+            <button class="btn-cycle" id="btnNoche">🌙 Noche (N)</button>
+        </div>
+
+        <div style="margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 6px;">
+            <div class="section-title">🌊 Especies del Acuario:</div>
+            <div class="creature-badge">🦈 1 Tiburoncín (Capa Superior)</div><br>
+            <div class="creature-badge">🪼 1 Medusa Bioluminiscente (Media)</div><br>
+            <div class="creature-badge">🐢 1 Tortuga Marina (Lecho Marino)</div><br>
+            <div class="creature-badge">🐠 5 Peces Payaso (En su Hábitat)</div><br>
+            <div class="creature-badge">🐟 22 Cirujanos Azules y Ángel Dorado</div>
+        </div>
+
+        <div style="margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.12); padding-top: 6px; font-size: 0.76rem;">
+            <div><strong>🖱️ Arrastrar:</strong> Orbitar cámara 360°</div>
+            <div><strong>🔄 Rueda:</strong> Zoom in / out</div>
+            <div><strong>⌨️ Teclas 1/2/3/4:</strong> Modos de Cámara</div>
+            <div style="margin-top: 4px;">Cámara actual: <span id="lblCamara" class="stat-tag">Orbital Gran Tanque</span></div>
+        </div>
+    </div>
+
+    <!-- Barra de acciones inferior flotante -->
+    <div id="bottom-bar">
+        <button class="btn-action" id="btnFood">🐟 Soltar Alimento (Espacio)</button>
+        <button class="btn-action" id="btnScatter">⚡ Dispersar Peces</button>
+        <button class="btn-action" id="btnToggleWire">📐 Alternar Pecera</button>
+        <span style="font-size: 0.82rem; margin-left: 8px; color: #94a3b8;">FPS: <span id="lblFps" class="stat-tag">60</span></span>
+    </div>
+
+    <!-- Scripts Modulares Ordenados por Pasos del Mini Motor Gráfico -->
+    <script src="js/script1_paso1_inicializacion.js"></script>
+    <script src="js/script2_paso2_shaders.js"></script>
+    <script src="js/script3_paso3_matematicas.js"></script>
+    <script src="js/script4_paso7_geometrias.js"></script>
+    <script src="js/script5_paso9_texturas.js"></script>
+    <script src="js/script6_paso13_cardumen_boids.js"></script>
+    <script src="js/script7_paso15_camara_interaccion.js"></script>
+    <script src="js/script8_paso4_render_loop.js"></script>
+</body>
+</html>

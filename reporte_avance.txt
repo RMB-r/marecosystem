@@ -1,0 +1,116 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+
+\geometry{left=3cm,right=3cm,top=0.5cm,bottom=1cm}
+
+\begin{document}
+
+% ============================================================
+% PORTADA
+% ============================================================
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+
+{\Large \textbf{UNIVERSIDAD NACIONAL DEL ALTIPLANO PUNO}}\\[0.4cm]
+{\large FACULTAD DE INGENIERÍA MECÁNICA ELÉCTRICA,}\\
+{\large ELECTRÓNICA Y SISTEMAS}\\[0.3cm]
+{\large ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS}\\[1cm]
+
+\includegraphics[width=0.5\textwidth]{Logo_UNAP.png}\\[1cm]
+
+{\large \textbf{CURSO:}}\\[0.6cm]
+{\Large \textbf{COMPUTACION GRAFICA}}\\[1.5cm]
+
+{\large \textbf{PROYECTO:}}\\[0.6cm]
+{\Large \textbf{Sistema Solar}}\\[1.5cm]
+
+{\large \textbf{ESTUDIANTE}}\\[0.6cm]
+{\large DIEGO ERICK CHOQUEHUANCA CCAMA}\\[1.5cm]
+
+
+
+{\large \textbf{PUNO -- PERÚ}}\\
+{\large \textbf{2026 -- II}}
+
+\end{titlepage}
+
+\newpage
+
+% ============================================================
+% CONTENIDO DEL REPORTE
+% ============================================================
+
+\section{Proyecto a Realizar}
+El presente proyecto consiste en el desarrollo progresivo de un simulador del \textbf{Sistema Solar en 3D} construido desde cero (from scratch), evitando en su fase inicial motores gráficos de alto nivel. Para ello, se emplea HTML5, JavaScript puro y la API gráfica WebGL 2.0 en conjunto con GLSL ES 3.00, con el fin de comprender a profundidad el funcionamiento matemático del pipeline gráfico (modelado, iluminación, texturizado y proyección).
+
+\section{Propósito}
+El propósito fundamental de este proyecto es asentar las bases teóricas y prácticas de la Computación Gráfica. Al desarrollar un mini motor gráfico a medida para renderizar el sistema solar, se busca:
+\begin{itemize}
+    \item Comprender la interacción directa entre JavaScript y la GPU mediante WebGL2.
+    \item Dominar las transformaciones geométricas (traslación, rotación, escala) mediante matrices algebraicas (3x3 y 4x4).
+    \item Implementar proyecciones matemáticas (ortogonales y perspectivas) para simular la visualización tridimensional.
+    \item Construir arquitecturas de animación controladas por el tiempo de ejecución (Render Loop).
+\end{itemize}
+
+\section{Objetos del Sistema Solar}
+Para la representación del Sistema Solar, se tiene planificado estructurar de manera jerárquica los siguientes objetos celestes y características:
+\begin{itemize}
+    \item \textbf{El Sol}: Centro lógico del sistema y base de la iluminación.
+    \item \textbf{La Tierra}: Planeta en órbita alrededor del Sol, con rotación sobre su propio eje inclinado.
+    \item \textbf{La Luna}: Satélite natural estructurado jerárquicamente para que su órbita dependa de la posición global de la Tierra.
+    \item \textbf{Planetas adicionales}: Mercurio, Venus, Marte, Júpiter, Saturno, Urano y Neptuno, cada uno con sus respectivas distancias orbitales y velocidades.
+    \item \textbf{Anillos}: Superficies y geometrías complementarias para planetas como Saturno.
+\end{itemize}
+\textit{Nota: Por limitaciones didácticas del nivel de desarrollo (hasta el Paso 6), los objetos se representan provisoriamente mediante geometrías volumétricas básicas (cubos) antes de migrar a esferas complejas.}
+
+\section{Procedimiento Realizado}
+La construcción del Sistema Solar se ha llevado a cabo de manera escalonada. A continuación se detallan los avances técnicos desarrollados en el código:
+
+\subsection{Inicialización del Contexto Gráfico}
+Se construyó un archivo HTML básico con un elemento \texttt{<canvas>}. Mediante JavaScript, se enlazó el lienzo y se extrajo el contexto \texttt{webgl2}. Se inicializaron los colores de fondo y se limpiaron los búferes de la pantalla, validando la comunicación inicial entre el navegador y la tarjeta gráfica (GPU).
+
+\subsection{Pipeline Base y Primera Geometría}
+Se configuró el pipeline de renderizado programable. Para esto:
+\begin{itemize}
+    \item Se escribieron los primeros \textit{Vertex Shaders} y \textit{Fragment Shaders} utilizando GLSL.
+    \item Se definieron los vértices de una geometría plana sencilla (triángulo) y se enviaron a la GPU asignándolos a un Buffer (VBO) y a un \textit{Vertex Array Object} (VAO).
+\end{itemize}
+
+\subsection{Transformaciones Matriciales}
+Para colocar los objetos en sus órbitas, se evitó modificar los vértices directamente. En su lugar, se desarrollaron funciones matemáticas desde cero para manejar \textbf{Matrices}. Mediante la composición matricial (Traslación $\times$ Rotación $\times$ Escala), se logró mover, girar y redimensionar la geometría en la pantalla enviando una única matriz (\texttt{uModelMatrix}) al shader.
+
+\subsection{Render Loop y Animación Temporal}
+La imagen estática se convirtió en interactiva y continua. Utilizando la función \texttt{requestAnimationFrame()} de HTML5, se implementó un bucle infinito de renderizado. Para garantizar un movimiento fluido y constante, todas las rotaciones y órbitas del Sol, la Tierra y la Luna pasaron a calcularse con base en un factor de tiempo diferencial (\texttt{deltaTime}) y velocidades angulares reales.
+
+\subsection{Salto a las Tres Dimensiones (3D)}
+La geometría base se reemplazó por un modelo 3D (Cubo). Esto implicó:
+\begin{itemize}
+    \item Añadir el Eje Z a todas las posiciones.
+    \item Evolucionar de matrices 3x3 a \textbf{Matrices 4x4} con coordenadas homogéneas.
+    \item Utilizar índices y la instrucción \texttt{drawElements} para optimizar el dibujo de las caras.
+    \item Activar la prueba de profundidad (\texttt{DEPTH\_TEST}) en WebGL para que las superficies sólidas frontales oculten de manera natural a las superficies posteriores.
+\end{itemize}
+
+\subsection{Cámara y Proyección Perspectiva}
+Para dotar a la simulación de volumen y distancia, se incorporaron dos matrices cruciales que forman el núcleo clásico de los gráficos tridimensionales:
+\begin{itemize}
+    \item \textbf{Matriz de Vista (View Matrix)}: Generada a través de cálculos vectoriales (LookAt) para colocar una "cámara" en la escena y apuntarla hacia el sistema planetario.
+    \item \textbf{Matriz de Proyección (Projection Matrix)}: Configurada para simular la visión del ojo humano (Perspectiva), utilizando parámetros de Campo de Visión (FOV), relación de aspecto y planos de recorte cercanos y lejanos.
+\end{itemize}
+Finalmente, el vértice en la GPU fue procesado resolviendo de manera exitosa la cadena matemática: $Proyeccion \cdot Vista \cdot Modelo$.
+
+\section{Resultados Esperados}
+Como resultado del avance técnico programado hasta esta fase, se espera visualizar en el navegador un espacio tridimensional renderizado por GPU en el que coexisten cuerpos celestes (representados por cubos tridimensionales de colores) ejecutando mecánicas orbitales jerárquicas precisas. Se observa al Sol rotando sobre su propio centro, a la Tierra trasladándose en una órbita circular alrededor de la posición del Sol y rotando simultáneamente, y a la Luna describiendo una órbita satelital subordinada a la posición global de la Tierra. Todo lo anterior renderizado bajo la influencia visual de un ente observador (cámara virtual) y una correcta deformación por perspectiva visual.
+
+\vspace{1cm}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{sistema-solar.png}
+    \caption{Renderizado tridimensional del Sistema Solar visualizado desde la cámara en perspectiva.}
+\end{figure}
+
+\end{document}

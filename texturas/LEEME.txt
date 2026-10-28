@@ -1,0 +1,10 @@
+Coloca aquí tus fotos e imágenes HD:
+- arena.jpg       (Textura de arena marina)
+- roca.jpg        (Textura de roca o arrecife)
+- coral.jpg       (Textura de corales o anémonas)
+- tiburon.jpg     (Piel del tiburón)
+- tortuga.jpg     (Caparazón y piel de tortuga)
+- pez_payaso.jpg  (Piel del pez payaso)
+- pez_azul.jpg    (Piel de cirujano azul / Dory)
+- medusa.png      (Textura de medusa)
+- alga.png        (Hojas de alga marina)

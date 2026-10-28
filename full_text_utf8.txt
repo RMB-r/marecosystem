@@ -1,0 +1,499 @@
+﻿=== Paso_0_Herramientas_Computacion_Grafica.docx ===
+
+
+
+COMPUTACIÓN GRÁFICA 2026-II
+
+PASO 0: HERRAMIENTAS
+Objetivo. Definir un entorno de trabajo mínimo y controlado para construir paso a paso el Sistema Solar 3D y el Mini Motor Gráfico, evitando herramientas que oculten los fundamentos que se desean enseñar.
+
+
+1. Herramientas seleccionadas
+Herramienta
+Uso en el curso/proyecto
+Antigravity
+Entorno principal de desarrollo. Se utilizará para crear, organizar, editar y depurar el proyecto.
+HTML5
+Estructura mínima de la aplicación y creación del elemento &lt;canvas&gt; donde WebGL realizará el renderizado.
+JavaScript
+Lenguaje principal para programar la lógica del Sistema Solar y construir progresivamente el Mini Motor Gráfico.
+WebGL 2.0
+API gráfica utilizada en la Unidad I para trabajar directamente con la GPU, vértices, buffers, primitivas y el pipeline gráfico.
+GLSL ES 3.00
+Lenguaje de shaders. Se utilizará para implementar Vertex Shaders y Fragment Shaders.
+Chrome / Edge
+Navegadores para ejecutar la aplicación WebGL2.
+DevTools
+Herramientas del navegador para revisar errores, consola, recursos y comportamiento de la aplicación.
+Git + GitHub
+Versionado del proyecto y evidencia de su evolución progresiva.
+Three.js
+Se introducirá desde la Unidad II, después de comprender e implementar los fundamentos mediante el Mini Motor.
+WebGPU + WGSL
+Se abordarán hacia el final del curso como evolución tecnológica de los gráficos web modernos.
+Codex
+Se utilizará al final para repotenciar el Sistema Solar base, manteniendo el control y comprensión de la implementación.
+
+
+2. Núcleo tecnológico de la Unidad I
+
+Antigravity + HTML5 + JavaScript + WebGL 2.0 + GLSL ES 3.00
+Este será el entorno central con el que construiremos el Sistema Solar base. El propósito es que el estudiante pueda observar la relación directa entre el código JavaScript, WebGL, los shaders y la GPU.
+
+
+3. Herramientas que no utilizaremos inicialmente
+
+
+Node.js: No será una dependencia del proyecto.
+
+
+npm: No se utilizará como gestor de paquetes durante la construcción base.
+
+
+Vite / Webpack u otros bundlers: Se evitarán para mantener la estructura del proyecto sencilla y transparente.
+
+
+React, Vue, Angular u otros frameworks web: No aportan al objetivo fundamental de aprender Computación Gráfica.
+
+
+Three.js en la Unidad I: No se utilizará inicialmente porque abstraería precisamente los componentes que queremos comprender e implementar.
+
+
+Librerías matemáticas como glMatrix: Inicialmente implementaremos nuestros propios vectores, matrices y transformaciones.
+
+
+WebGPU al inicio: Se estudiará después de dominar los fundamentos del pipeline mediante WebGL.
+
+
+4. Estructura inicial del proyecto
+
+sistema-solar/│├── index.html├── js/│   └── main.js│└── shaders/
+La estructura crecerá únicamente cuando aparezca una necesidad real. No se creará desde el comienzo una arquitectura compleja del Mini Motor. Las clases y carpetas surgirán progresivamente conforme se estudien los conceptos.
+
+
+5. Criterio pedagógico
+Principio: no utilizar una herramienta que resuelva automáticamente aquello que el estudiante todavía necesita comprender.
+Durante la Unidad I: construiremos y comprenderemos.
+Durante la Unidad II: utilizaremos abstracciones profesionales como Three.js y compararemos su arquitectura con lo construido.
+Al final: Codex podrá utilizarse para repotenciar el Sistema Solar base. Las mejoras deberán seguir siendo explicables, adaptables y modificables por quien desarrolla el proyecto.
+
+
+6. Resultado del Paso 0
+Decisión cerrada: el Sistema Solar 3D base se desarrollará sin Node.js, npm ni Vite, utilizando Antigravity como entorno de desarrollo y HTML5 + JavaScript + WebGL 2.0 + GLSL ES 3.00 como núcleo tecnológico.
+Con el entorno definido, el siguiente paso será crear el proyecto mínimo, preparar el canvas, obtener el contexto WebGL2 y comprobar el primer renderizado mediante la GPU.
+
+
+=== Paso_1_Inicializacion_WebGL2.docx ===
+
+
+
+COMPUTACIÓN GRÁFICA 2026-II
+
+PASO 1: INICIALIZACIÓN DE WEBGL2 Y PREPARACIÓN DEL ÁREA DE RENDERIZADO
+Objetivo. Crear la estructura mínima del proyecto, preparar un elemento canvas en HTML, obtener el contexto WebGL2 desde JavaScript y realizar el primer renderizado básico limpiando el framebuffer con un color de fondo.
+
+
+1. Resultado esperado
+Al finalizar este paso, el navegador debe mostrar un canvas de 900 × 600 píxeles con un color de fondo definido mediante WebGL2. Todavía no se dibujarán geometrías.
+
+
+2. Flujo conceptual
+
+HTML → JavaScript → WebGL2 → GPU → Canvas
+El canvas es únicamente el área visible donde aparecerá el resultado. JavaScript solicita el contexto WebGL2 y, mediante esta API, envía instrucciones al sistema gráfico.
+
+
+3. Estructura del proyecto
+sistema-solar/│├── index.html│└── js/    └── main.js
+
+
+4. Código fuente de index.html
+&lt;!DOCTYPE html&gt;&lt;html lang="es"&gt;&lt;head&gt;    &lt;meta charset="UTF-8"&gt;    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;    &lt;title&gt;Sistema Solar 3D - Paso 1&lt;/title&gt;    &lt;style&gt;        body {            margin: 0;            background: #111;            display: flex;            justify-content: center;            align-items: center;            height: 100vh;        }        canvas {            border: 1px solid #444;        }    &lt;/style&gt;&lt;/head&gt;&lt;body&gt;    &lt;canvas        id="glCanvas"        width="900"        height="600"&gt;    &lt;/canvas&gt;    &lt;script src="js/main.js"&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+
+
+5. Código fuente de js/main.js
+const canvas = document.getElementById("glCanvas");const gl = canvas.getContext("webgl2");if (!gl) {    throw new Error("WebGL2 no está disponible en este navegador.");}gl.viewport(0, 0, canvas.width, canvas.height);gl.clearColor(0.0, 0.0, 0.0, 1.0);gl.clear(gl.COLOR_BUFFER_BIT);
+
+
+6. Explicación del código
+Instrucción
+Función
+document.getElementById("glCanvas")
+Obtiene desde el documento HTML el elemento canvas donde se mostrará el resultado gráfico.
+canvas.getContext("webgl2")
+Solicita al navegador un contexto WebGL 2.0 asociado al canvas.
+if (!gl)
+Verifica si WebGL2 está disponible. Si no lo está, se detiene la ejecución con un mensaje de error.
+gl.viewport(...)
+Define el área del canvas que WebGL utilizará para realizar el renderizado.
+gl.clearColor(...)
+Establece el color que WebGL utilizará para limpiar el buffer de color.
+gl.clear(gl.COLOR_BUFFER_BIT)
+Limpia el framebuffer utilizando el color definido previamente.
+
+
+7. Conceptos nuevos
+
+
+Canvas: superficie HTML sobre la que se mostrará la imagen producida por WebGL.
+
+
+Contexto WebGL2: objeto principal mediante el cual JavaScript accede a las funciones de WebGL.
+
+
+Viewport: región del canvas utilizada para renderizar.
+
+
+Framebuffer: conjunto de buffers donde WebGL genera temporalmente la imagen.
+
+
+Color buffer: buffer que almacena la información de color de cada píxel.
+
+
+Clear: operación que reinicia un buffer antes de comenzar un nuevo renderizado.
+
+
+8. Pruebas rápidas
+Para verificar que el código funciona correctamente, modificar temporalmente los valores de gl.clearColor(). Por ejemplo:
+gl.clearColor(0.0, 0.2, 0.5, 1.0);
+Al recargar la página, el color del canvas debe cambiar. Esto demuestra que WebGL2 está controlando el área de renderizado.
+
+
+9. Qué todavía NO estamos haciendo
+
+
+No estamos dibujando triángulos ni otras primitivas.
+
+
+No existen todavía vértices ni buffers de vértices.
+
+
+No utilizamos Vertex Shader ni Fragment Shader.
+
+
+No trabajamos todavía con matrices, cámaras ni perspectiva.
+
+
+No utilizamos Three.js.
+
+
+10. Resultado del Paso 1
+El proyecto ya dispone de un canvas controlado por WebGL2. La comunicación básica entre HTML, JavaScript y WebGL está funcionando. Con esta base podemos comenzar a enviar geometría al pipeline gráfico.
+
+
+11. Siguiente paso
+Paso 2: Primer triángulo con WebGL2. Se introducirán vértices, buffers, Vertex Shader, Fragment Shader y la primera llamada de dibujo.
+
+
+=== Paso_2_Primer_Triangulo_WebGL2.docx ===
+
+
+
+COMPUTACIÓN GRÁFICA 2026-II
+
+PASO 2: PRIMER TRIÁNGULO CON WEBGL2
+Objetivo. Renderizar la primera geometría real utilizando WebGL2 y comprender por primera vez el recorrido completo desde los vértices definidos en JavaScript hasta los píxeles producidos por la GPU.
+
+
+1. Resultado esperado
+Al finalizar este paso debe mostrarse un triángulo sobre el canvas. Aunque visualmente es sencillo, este paso introduce por primera vez el pipeline gráfico programable.
+
+JavaScript → Vértices → Buffer → Vertex Shader → Rasterización → Fragment Shader → Framebuffer → Canvas
+
+
+2. Conceptos nuevos
+Concepto
+Significado en este paso
+Vértice
+Punto que contiene información geométrica. En este paso cada vértice tendrá solamente posición X, Y.
+NDC
+Normalized Device Coordinates. WebGL espera inicialmente posiciones visibles entre -1 y 1 en X, Y y Z después del procesamiento del vertex shader.
+Buffer
+Zona de memoria administrada por WebGL donde copiamos los datos de los vértices.
+Vertex Shader
+Programa ejecutado por la GPU para cada vértice. Debe producir gl_Position.
+Fragment Shader
+Programa ejecutado para producir el color de los fragmentos generados por la rasterización.
+Programa WebGL
+Resultado de compilar y enlazar el Vertex Shader y el Fragment Shader.
+VAO
+Vertex Array Object. Guarda la configuración utilizada para interpretar los atributos de los vértices.
+drawArrays
+Orden que finalmente solicita a WebGL renderizar la primitiva.
+
+
+3. Estructura del proyecto
+
+sistema-solar/│├── index.html└── js/    └── main.js
+En este paso los shaders se escribirán dentro de main.js como cadenas de texto. Más adelante los separaremos cuando la arquitectura del proyecto lo justifique. Así evitamos agregar complejidad antes de necesitarla.
+
+
+4. Código completo de index.html
+
+&lt;!DOCTYPE html&gt;&lt;html lang="es"&gt;&lt;head&gt;    &lt;meta charset="UTF-8"&gt;    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;    &lt;title&gt;Sistema Solar 3D - Paso 2&lt;/title&gt;    &lt;style&gt;        body {            margin: 0;            min-height: 100vh;            display: flex;            justify-content: center;            align-items: center;            background: #111;        }        canvas {            border: 1px solid #444;        }    &lt;/style&gt;&lt;/head&gt;&lt;body&gt;    &lt;canvas id="glCanvas" width="900" height="600"&gt;&lt;/canvas&gt;    &lt;script src="js/main.js"&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+
+
+5. Código completo de js/main.js
+
+// ------------------------------------------------------------// PASO 2 - PRIMER TRIÁNGULO CON WEBGL2// ------------------------------------------------------------const canvas = document.getElementById("glCanvas");const gl = canvas.getContext("webgl2");if (!gl) {    throw new Error("WebGL2 no está disponible en este navegador.");}// ------------------------------------------------------------// 1. Preparar el área de renderizado// ------------------------------------------------------------gl.viewport(0, 0, canvas.width, canvas.height);gl.clearColor(0.0, 0.0, 0.0, 1.0);gl.clear(gl.COLOR_BUFFER_BIT);// ------------------------------------------------------------// 2. Definir los tres vértices del triángulo//    Coordenadas NDC: valores entre -1 y 1// ------------------------------------------------------------const vertices = new Float32Array([     0.0,  0.7,   // vértice superior    -0.7, -0.7,   // vértice inferior izquierdo     0.7, -0.7    // vértice inferior derecho]);// ------------------------------------------------------------// 3. Crear y llenar el buffer de vértices// ------------------------------------------------------------const vertexBuffer = gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);// ------------------------------------------------------------// 4. Código del Vertex Shader// ------------------------------------------------------------const vertexShaderSource = `#version 300 esin vec2 aPosition;void main() {    gl_Position = vec4(aPosition, 0.0, 1.0);}`;// ------------------------------------------------------------// 5. Código del Fragment Shader// ------------------------------------------------------------const fragmentShaderSource = `#version 300 esprecision highp float;out vec4 outColor;void main() {    outColor = vec4(1.0, 0.75, 0.1, 1.0);}`;// ------------------------------------------------------------// 6. Función para compilar un shader// ------------------------------------------------------------function crearShader(gl, tipo, codigoFuente) {    const shader = gl.createShader(tipo);    gl.shaderSource(shader, codigoFuente);    gl.compileShader(shader);    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {        const error = gl.getShaderInfoLog(shader);        gl.deleteShader(shader);        throw new Error("Error al compilar shader:\n" + error);    }    return shader;}const vertexShader = crearShader(    gl,    gl.VERTEX_SHADER,    vertexShaderSource);const fragmentShader = crearShader(    gl,    gl.FRAGMENT_SHADER,    fragmentShaderSource);// ------------------------------------------------------------// 7. Crear y enlazar el programa WebGL// ------------------------------------------------------------const program = gl.createProgram();gl.attachShader(program, vertexShader);gl.attachShader(program, fragmentShader);gl.linkProgram(program);if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {    throw new Error(        "Error al enlazar programa:\n" + gl.getProgramInfoLog(program)    );}// ------------------------------------------------------------// 8. Configurar el atributo aPosition mediante un VAO// ------------------------------------------------------------const vao = gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);const positionLocation = gl.getAttribLocation(program, "aPosition");gl.enableVertexAttribArray(positionLocation);gl.vertexAttribPointer(    positionLocation, // ubicación del atributo    2,                // dos componentes: x, y    gl.FLOAT,         // tipo de dato    false,            // sin normalización    0,                // stride    0                 // offset);// ------------------------------------------------------------// 9. Dibujar// ------------------------------------------------------------gl.useProgram(program);gl.bindVertexArray(vao);gl.drawArrays(    gl.TRIANGLES,    0,    3);
+
+
+6. ¿Qué está ocurriendo realmente?
+
+
+1. JavaScript define tres vértices: Los seis números representan tres posiciones (x,y).
+
+
+2. Los vértices se copian a un buffer: gl.bufferData() envía los datos que WebGL utilizará durante el renderizado.
+
+
+3. El Vertex Shader procesa cada vértice: Para cada posición recibida construye gl_Position, que es obligatoria.
+
+
+4. WebGL forma un triángulo: gl.TRIANGLES indica que cada grupo de tres vértices forma un triángulo.
+
+
+5. La GPU rasteriza: El área interna del triángulo se convierte en fragmentos potenciales.
+
+
+6. El Fragment Shader asigna color: Cada fragmento recibe el color definido en outColor.
+
+
+7. El resultado llega al framebuffer: El navegador muestra posteriormente ese framebuffer dentro del canvas.
+
+
+7. Coordenadas utilizadas
+En este paso todavía no utilizamos nuestras matrices ni cámara. Definimos directamente los vértices en coordenadas normalizadas (NDC).
+Vértice
+X
+Y
+Superior
+0.0
+0.7
+Inferior izquierdo
+-0.7
+-0.7
+Inferior derecho
+0.7
+-0.7
+En NDC, aproximadamente: izquierda = -1, derecha = +1, abajo = -1 y arriba = +1. Esta simplificación desaparecerá cuando introduzcamos transformaciones, cámara y proyección.
+
+
+8. Qué NO estamos haciendo todavía
+
+
+No utilizamos matrices.
+
+
+No utilizamos cámara.
+
+
+No utilizamos perspectiva.
+
+
+No utilizamos geometría 3D real.
+
+
+No utilizamos iluminación.
+
+
+No utilizamos texturas.
+
+
+No utilizamos Three.js.
+
+
+No utilizamos clases del Mini Motor.
+Esto es deliberado: en este paso queremos aislar y comprender el pipeline mínimo necesario para producir una geometría con WebGL2.
+
+
+9. Pruebas rápidas para comprender el código
+
+
+Cambiar uno de los valores X o Y de los vértices y observar cómo cambia la forma.
+
+
+Cambiar el color del Fragment Shader.
+
+
+Reemplazar gl.TRIANGLES temporalmente por gl.POINTS o gl.LINE_LOOP y observar la diferencia.
+
+
+Comentar gl.useProgram(program) y observar el error/comportamiento.
+
+
+Introducir deliberadamente un error sintáctico en un shader para observar el mensaje de compilación.
+
+
+10. Resultado del Paso 2
+Al finalizar este paso debemos comprender esta idea: para dibujar incluso un simple triángulo en WebGL2 necesitamos proporcionar datos geométricos, almacenarlos en memoria gráfica, indicar cómo interpretar sus atributos y ejecutar programas de GPU que determinen posición y color.
+
+PRIMERA GEOMETRÍA RENDERIZADA CON NUESTRO PROPIO PIPELINE WEBGL2
+
+
+11. Siguiente paso
+El Paso 3 debe introducir las primeras transformaciones de la geometría. Antes de llegar al Sistema Solar necesitamos dejar de modificar manualmente los vértices y comenzar a transformar los objetos mediante matemática. Ahí aparecerán progresivamente vectores, matrices y transformaciones.
+
+
+=== Paso_3_Transformaciones_Matriciales_2D_WebGL2.docx ===
+
+
+
+COMPUTACIÓN GRÁFICA 2026-II
+
+PASO 3: TRANSFORMACIONES MATRICIALES 2D
+
+Traslación, rotación, escalamiento y composición de transformaciones
+Objetivo. Dejar de modificar manualmente las coordenadas de los vértices y comenzar a transformar la geometría mediante matrices. El triángulo del Paso 2 se mantendrá intacto; su posición, orientación y tamaño se modificarán mediante una matriz enviada al Vertex Shader.
+
+
+1. Resultado esperado
+Al finalizar este paso debe seguir apareciendo el mismo triángulo del Paso 2, pero ahora podremos trasladarlo, rotarlo y escalarlo cambiando únicamente parámetros de transformación. Los vértices originales permanecerán sin alterarse.
+
+Vértice original → Matriz de modelo → Vértice transformado → Rasterización
+
+
+2. Idea fundamental del Paso 3
+Hasta el Paso 2, para mover el triángulo tendríamos que cambiar directamente los números del arreglo de vértices. Eso no es escalable. En Computación Gráfica se conserva la geometría en su sistema local y se aplican transformaciones matemáticas.
+
+P' = M · P
+Para trabajar cómodamente con traslaciones en 2D utilizaremos coordenadas homogéneas. Un punto (x, y) se representará temporalmente como (x, y, 1), lo que permite aplicar traslación, rotación y escalamiento mediante matrices 3×3.
+
+
+3. Matrices que utilizaremos
+Transformación
+Parámetros
+Efecto
+Traslación
+tx, ty
+Mueve el objeto sin modificar su forma.
+Rotación
+θ
+Gira el objeto alrededor de su origen local.
+Escalamiento
+sx, sy
+Modifica el tamaño del objeto en cada eje.
+Composición
+T · R · S
+Combina varias transformaciones en una sola matriz.
+
+Orden utilizado en este paso: M = T · R · S
+Al multiplicar la matriz por un punto, la operación más cercana al punto se aplica primero. Por tanto, con M = T · R · S el triángulo primero se escala, luego rota y finalmente se traslada.
+
+
+4. Estructura del proyecto
+
+
+sistema-solar/│├── index.html└── js/    └── main.js
+La estructura todavía no cambia. Seguimos manteniendo los shaders dentro de main.js para concentrarnos únicamente en el concepto nuevo: las transformaciones matriciales.
+
+
+5. Código completo de index.html
+
+
+&lt;!DOCTYPE html&gt;&lt;html lang="es"&gt;&lt;head&gt;    &lt;meta charset="UTF-8"&gt;    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;    &lt;title&gt;Sistema Solar 3D - Paso 3&lt;/title&gt;    &lt;style&gt;        body {            margin: 0;            min-height: 100vh;            display: flex;            justify-content: center;            align-items: center;            background: #111;        }        canvas {            border: 1px solid #444;        }    &lt;/style&gt;&lt;/head&gt;&lt;body&gt;    &lt;canvas id="glCanvas" width="900" height="600"&gt;&lt;/canvas&gt;    &lt;script src="js/main.js"&gt;&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;
+
+
+6. Código completo de js/main.js
+
+
+// ------------------------------------------------------------// PASO 3 - TRANSFORMACIONES MATRICIALES 2D// ------------------------------------------------------------const canvas = document.getElementById("glCanvas");const gl = canvas.getContext("webgl2");if (!gl) {    throw new Error("WebGL2 no está disponible en este navegador.");}// ------------------------------------------------------------// 1. Preparar el área de renderizado// ------------------------------------------------------------gl.viewport(0, 0, canvas.width, canvas.height);gl.clearColor(0.0, 0.0, 0.0, 1.0);// ------------------------------------------------------------// 2. Geometría original del triángulo//    IMPORTANTE: estos vértices ya no se modificarán para mover,//    rotar o escalar el objeto.// ------------------------------------------------------------const vertices = new Float32Array([     0.0,  0.35,    -0.35, -0.35,     0.35, -0.35]);const vertexBuffer = gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);// ------------------------------------------------------------// 3. Vertex Shader//    Recibe una matriz 3x3 llamada uModelMatrix.// ------------------------------------------------------------const vertexShaderSource = `#version 300 esin vec2 aPosition;uniform mat3 uModelMatrix;void main() {    vec3 posicionLocal = vec3(aPosition, 1.0);    vec3 posicionTransformada = uModelMatrix * posicionLocal;    gl_Position = vec4(        posicionTransformada.xy,        0.0,        1.0    );}`;// ------------------------------------------------------------// 4. Fragment Shader// ------------------------------------------------------------const fragmentShaderSource = `#version 300 esprecision highp float;out vec4 outColor;void main() {    outColor = vec4(1.0, 0.75, 0.1, 1.0);}`;// ------------------------------------------------------------// 5. Compilar shaders// ------------------------------------------------------------function crearShader(gl, tipo, codigoFuente) {    const shader = gl.createShader(tipo);    gl.shaderSource(shader, codigoFuente);    gl.compileShader(shader);    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {        const error = gl.getShaderInfoLog(shader);        gl.deleteShader(shader);        throw new Error("Error al compilar shader:\n" + error);    }    return shader;}const vertexShader = crearShader(    gl,    gl.VERTEX_SHADER,    vertexShaderSource);const fragmentShader = crearShader(    gl,    gl.FRAGMENT_SHADER,    fragmentShaderSource);// ------------------------------------------------------------// 6. Crear programa WebGL// ------------------------------------------------------------const program = gl.createProgram();gl.attachShader(program, vertexShader);gl.attachShader(program, fragmentShader);gl.linkProgram(program);if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {    throw new Error(        "Error al enlazar programa:\n" + gl.getProgramInfoLog(program)    );}// ------------------------------------------------------------// 7. Configurar atributo aPosition mediante VAO// ------------------------------------------------------------const vao = gl.createVertexArray();gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);const positionLocation = gl.getAttribLocation(program, "aPosition");gl.enableVertexAttribArray(positionLocation);gl.vertexAttribPointer(    positionLocation,    2,    gl.FLOAT,    false,    0,    0);// ------------------------------------------------------------// 8. Funciones matemáticas: matrices 3x3//    WebGL utiliza los datos en orden de columnas.// ------------------------------------------------------------function matrizIdentidad() {    return new Float32Array([        1, 0, 0,        0, 1, 0,        0, 0, 1    ]);}function matrizTraslacion(tx, ty) {    return new Float32Array([        1,  0, 0,        0,  1, 0,        tx, ty, 1    ]);}function matrizRotacion(anguloRadianes) {    const c = Math.cos(anguloRadianes);    const s = Math.sin(anguloRadianes);    return new Float32Array([         c, s, 0,        -s, c, 0,         0, 0, 1    ]);}function matrizEscala(sx, sy) {    return new Float32Array([        sx, 0,  0,        0,  sy, 0,        0,  0,  1    ]);}function multiplicarMat3(a, b) {    const resultado = new Float32Array(9);    for (let columna = 0; columna &lt; 3; columna++) {        for (let fila = 0; fila &lt; 3; fila++) {            let suma = 0;            for (let k = 0; k &lt; 3; k++) {                suma +=                    a[k * 3 + fila] *                    b[columna * 3 + k];            }            resultado[columna * 3 + fila] = suma;        }    }    return resultado;}// ------------------------------------------------------------// 9. Parámetros de transformación//    Cambie estos valores y observe el resultado.// ------------------------------------------------------------const tx = 0.30;const ty = 0.10;const anguloGrados = 35;const anguloRadianes = anguloGrados * Math.PI / 180;const sx = 1.20;const sy = 0.80;// ------------------------------------------------------------// 10. Construir la matriz de modelo////     M = T * R * S////     El objeto://     1. se escala,//     2. luego rota,//     3. finalmente se traslada.// ------------------------------------------------------------const T = matrizTraslacion(tx, ty);const R = matrizRotacion(anguloRadianes);const S = matrizEscala(sx, sy);const RS = multiplicarMat3(R, S);const modelMatrix = multiplicarMat3(T, RS);// ------------------------------------------------------------// 11. Enviar la matriz al Vertex Shader// ------------------------------------------------------------gl.useProgram(program);const modelMatrixLocation =    gl.getUniformLocation(program, "uModelMatrix");gl.uniformMatrix3fv(    modelMatrixLocation,    false,    modelMatrix);// ------------------------------------------------------------// 12. Renderizar// ------------------------------------------------------------gl.clear(gl.COLOR_BUFFER_BIT);gl.bindVertexArray(vao);gl.drawArrays(    gl.TRIANGLES,    0,    3);
+
+
+7. ¿Qué cambió respecto al Paso 2?
+Cambio
+Significado
+Los vértices permanecen intactos
+El triángulo conserva su geometría local. Ya no modificamos sus coordenadas para posicionarlo.
+Aparece un uniform
+uModelMatrix contiene una matriz que es igual para todos los vértices del objeto durante esa llamada de dibujo.
+El Vertex Shader transforma
+Cada vértice se multiplica por la matriz de modelo antes de llegar a gl_Position.
+Aparece matemática reutilizable
+Creamos funciones para traslación, rotación, escala y multiplicación de matrices.
+Las transformaciones se componen
+Varias operaciones se combinan en una sola matriz antes de enviarla a la GPU.
+
+
+8. El nuevo elemento clave: uniform
+En el Paso 2 solamente utilizamos un atributo (aPosition). Un atributo puede cambiar para cada vértice. En este paso aparece un uniform: uModelMatrix. Su valor permanece constante para todos los vértices procesados durante el dibujo de este objeto.
+
+JavaScript → gl.uniformMatrix3fv(...) → uModelMatrix → Vertex Shader
+
+
+9. Por qué utilizamos coordenadas homogéneas
+Rotación y escalamiento pueden representarse fácilmente con matrices 2×2. La traslación no. Al incorporar una tercera componente con valor 1 podemos representar las tres transformaciones mediante matrices 3×3 y componerlas utilizando multiplicación matricial.
+
+(x, y) → (x, y, 1)
+
+
+10. El orden de las transformaciones importa
+La multiplicación de matrices no es conmutativa. Por tanto, T · R · S no produce necesariamente el mismo resultado que S · R · T. Este hecho será esencial posteriormente cuando construyamos órbitas, jerarquías y relaciones como Sol → Tierra → Luna.
+
+T · R · S  ≠  S · R · T
+
+
+11. Pruebas de comprensión
+
+
+Cambiar tx y ty sin modificar el arreglo vertices.
+
+
+Cambiar anguloGrados a 0, 45, 90 y 180.
+
+
+Usar sx = 2.0 y sy = 0.5 para observar un escalamiento no uniforme.
+
+
+Cambiar el orden de composición a R · T · S y comparar el resultado.
+
+
+Eliminar temporalmente la matriz de traslación y observar qué transformación permanece.
+
+
+Asignar la matriz identidad como modelMatrix y verificar que el triángulo vuelva a su estado original.
+
+
+12. Relación con el Sistema Solar
+Este paso todavía utiliza un triángulo porque queremos aislar el concepto matemático. Sin embargo, la misma idea será utilizada posteriormente con cada cuerpo celeste. Un planeta conservará su geometría local y modificaremos su posición, tamaño y orientación mediante matrices.
+
+Geometría del planeta + Matriz de modelo = Planeta transformado en la escena
+
+
+13. Qué NO estamos haciendo todavía
+
+
+No utilizamos todavía matrices 4×4.
+
+
+No trabajamos aún con el eje Z.
+
+
+No existe cámara.
+
+
+No existe proyección perspectiva.
+
+
+No existe animación ni Render Loop.
+
+
+No existen órbitas.
+
+
+No existen esferas ni planetas.
+
+
+No utilizamos Three.js.
+
+
+14. Resultado del Paso 3
+El triángulo ya no necesita ser reescrito para moverlo, rotarlo o escalarlo. La geometría se conserva en coordenadas locales y una matriz de modelo determina cómo aparece en la escena.
+
+PRIMERA TRANSFORMACIÓN MATRICIAL CONTROLADA DESDE NUESTRO PIPELINE WEBGL2
+
+
+15. Siguiente paso
+Paso 4: Animación y Render Loop. La siguiente necesidad natural será dejar de mostrar una transformación estática y actualizarla en el tiempo. Introduciremos requestAnimationFrame(), tiempo, velocidad angular y una función de renderizado repetitiva. Esto será la base directa para la rotación de planetas y, posteriormente, sus órbitas.
+
+
